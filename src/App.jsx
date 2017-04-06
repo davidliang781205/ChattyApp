@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import Nav from './Nav.jsx';
 import ChatBar from './ChatBar.jsx';
 import MessageList from './MessageList.jsx';
 
@@ -8,17 +9,11 @@ class App extends Component {
     super(props);
     this.state = {
       currentUser: {
-        name: "Bob"
+        name: 'Anonymous'
       }, // optional. if currentUser is not defined, it means the user is Anonymous
-      messages: [
-        {
-          username: "Bob",
-          content: "Has anyone seen my marbles?"
-        }, {
-          username: "Anonymous",
-          content: "No, I think you lost them. You lost your marbles Bob. You lost them for good."
-        }
-      ]
+      messages: [],
+      onlineUser: 0,
+      color: '#444444'
     }
 
     this.addMessage = this
@@ -26,26 +21,65 @@ class App extends Component {
       .bind(this);
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+    this.socket = new WebSocket('ws://localhost:3001');
+    this.socket.onopen = () => {
+      this.socket.onmessage = (message) => {
+        message = JSON.parse(message.data)
+        if (message.type === 'onlineUsers') {
+          // Setting online users if message type equals onlineUsers
+          this.setState({onlineUser: message.number});
+        } else if (message.type === 'userColor') {
+          this.setState({color: message.color})
+        } else {
+          // Post message or notification
+          this
+            .state
+            .messages
+            .push(message);
+          this.setState({messages: this.state.messages});
+        }
 
-  addMessage(username, content) {
+      }
+    }
+
+  }
+
+  addMessage(type, username, content) {
     const message = {
+      type,
       username,
       content
     };
+    if (type === 'postMessage') {
+      this
+        .socket
+        .send(JSON.stringify(message));
+
+    } else {
+      // Add description to content if type equals notification
+      message.content = this.state.currentUser.name + ' has changed their name to ' + username;
+      const currentUser = this.state.currentUser;
+      currentUser.name = username;
+      this.setState({currentUser})
+      this
+        .socket
+        .send(JSON.stringify(message));
+    }
     const messages = this
       .state
       .messages
       .concat(message);
-    this.setState({messages: messages});
   }
 
   render() {
     return (
       <div>
+        <Nav number={this.state.onlineUser}/>
         <MessageList messages={this.state.messages}/>
         <ChatBar
           currentUser={this.state.currentUser.name}
+          color={this.state.color}
           handleKeyPress={this.addMessage}/>
       </div>
     );

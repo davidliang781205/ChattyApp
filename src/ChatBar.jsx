@@ -5,10 +5,12 @@ class ChatBar extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            type: '',
             username: this.props.currentUser
                 ? this.props.currentUser
                 : "Anonymous",
-            content: ''
+            content: '',
+            color: this.props.color
         };
         this.inputEnter = this
             .inputEnter
@@ -16,31 +18,45 @@ class ChatBar extends Component {
         this.onChangeContent = this
             .onChangeContent
             .bind(this);
+        this.onChangeUsername = this
+            .onChangeUsername
+            .bind(this);
     }
 
     inputEnter(event) {
         if (event.key === "Enter") {
-            this
-                .props
-                .handleKeyPress(this.state.username, this.state.content);
-            this.setState({content: ''});
+            if (this.state.type) {
+                this
+                    .props
+                    .handleKeyPress(this.state.type, this.state.username, this.state.content, this.state.color);
+                this.setState({content: ''});
+            } else {
+                alert('You didn\'t change anything');
+            }
         }
     }
 
     onChangeContent(event) {
-        this.setState({content: event.target.value});
+        this.setState({type: 'postMessage', content: event.target.value});
+    }
+
+    onChangeUsername(event) {
+        this.setState({type: 'postNotification', username: event.target.value});
     }
 
     render() {
 
+        const textColor = {
+            color: this.props.color
+        };
         return (
             <footer className="chatbar" onKeyPress={this.inputEnter}>
                 <input
                     className="chatbar-username"
                     placeholder="Name"
-                    defaultValue={this.props.currentUser
-                    ? this.props.currentUser
-                    : "Anonymous"}/>
+                    defaultValue={this.state.username}
+                    onChange={this.onChangeUsername}
+                    style={textColor}/>
                 <input
                     className="chatbar-message"
                     placeholder="Type a message and hit ENTER"

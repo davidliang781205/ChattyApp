@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import Message from './Message.jsx';
+import SystemMessage from './SystemMessage.jsx';
 
 class MessageList extends Component {
     render() {
@@ -9,14 +10,16 @@ class MessageList extends Component {
                     .props
                     .messages
                     .map((e) => {
-                        return <Message
-                            key={e.username + e.content}
-                            username={e.username}
-                            content={e.content}/>
+                        if (e.type === 'incomingMessage') {
+                            return <Message
+                                key={e.uuid}
+                                username={e.username}
+                                content={e.content}
+                                color={e.color}/>
+                        } else {
+                            return <SystemMessage key={e.uuid} content={e.content} color={e.color}/>
+                        }
                     })}
-                {/*<div className="message system">
-                Anonymous1 changed their name to nomnom.
-            </div>*/}
             </main>
         );
     }
