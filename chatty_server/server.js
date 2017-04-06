@@ -53,12 +53,14 @@ wss.on('connection', (ws) => {
         // handle incoming message
         message.type = 'incomingMessage';
         message.uuid = uuidV1();
+        message.color = sockets[socketId].color;
         message = JSON.stringify(message);
         break;
       case "postNotification":
         // handle incoming notification
         message.type = 'incomingNotification';
         message.uuid = uuidV1();
+        message.color = sockets[socketId].color;
         message = JSON.stringify(message);
         break;
       default:
