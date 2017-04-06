@@ -26,18 +26,52 @@ wss.broadcast = function broadcast(data) {
 };
 // Set up a callback that will run when a client connects to the server When a
 // client connects they are assigned a socket, represented by the ws parameter
-// in the callback.
+// in the callback. Use a sequence of unique IDs for every socket
+let nextSocketId = 1;
+// Store color about each socket
+const sockets = {};
+
 wss.on('connection', (ws) => {
+  // Assign the new socket the next ID
+  const socketId = nextSocketId;
+  // Then increment the next ID so the next socket gets a higher number
+  nextSocketId++;
+
+  sockets[socketId] = {
+    socket: ws,
+    color: '#' + Math.floor(Math.random() * 16777215).toString(16)
+  };
+
   console.log('Client connected');
+  wss.broadcast(JSON.stringify({ type: 'onlineUsers', number: wss.clients.size }));
+  ws.send(JSON.stringify({ type: 'userColor', color: sockets[socketId].color }));
+
   ws.on('message', (message) => {
     message = JSON.parse(message);
-    message.uuid = uuidV1();
-    message = JSON.stringify(message);
-    console.log(message);
+    switch (message.type) {
+      case "postMessage":
+        // handle incoming message
+        message.type = 'incomingMessage';
+        message.uuid = uuidV1();
+        message = JSON.stringify(message);
+        break;
+      case "postNotification":
+        // handle incoming notification
+        message.type = 'incomingNotification';
+        message.uuid = uuidV1();
+        message = JSON.stringify(message);
+        break;
+      default:
+        // show an error in the console if the message type is unknown
+        throw new Error("Unknown event type " + message.type);
+    }
+
     wss.broadcast(message);
   });
 
   // Set up a callback for when a client closes the socket. This usually means
   // they closed their browser.
-  ws.on('close', () => console.log('Client disconnected'));
+  ws.on('close', () => {
+    wss.broadcast(JSON.stringify({ type: 'onlineUsers', number: wss.clients.size }));
+  });
 });
