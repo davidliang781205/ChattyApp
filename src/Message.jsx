@@ -5,13 +5,16 @@ class Message extends Component {
     const textColor = {
       color: this.props.color
     };
-    if (new RegExp('(http:\/\/|https:\/\/)+.+(.jpg|.png|.jpeg|.svg)', 'g').test(this.props.content)) {
+    const imgSize = {
+      width: '60%'
+    }
+    if (new RegExp('(http:\/\/|https:\/\/)+.+(.jpg|.png|.jpeg|.svg|.gif)', 'g').test(this.props.content)) {
       return (
         <div className="message">
           <span className="message-username" style={textColor}>{this.props.username}</span>
           <span className="message-content">{this.props.content}
             <br/>
-            <img src={this.props.content}/></span>
+            <img src={this.props.content} style={imgSize}/></span>
         </div>
       );
     } else {
