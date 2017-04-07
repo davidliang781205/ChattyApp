@@ -51,12 +51,7 @@ class App extends Component {
       username,
       content
     };
-    if (type === 'postMessage') {
-      this
-        .socket
-        .send(JSON.stringify(message));
-
-    } else {
+    if (type === 'postNotification') {
       // Add description to content if type equals notification
       message.content = this.state.currentUser.name + ' has changed their name to ' + username;
       const currentUser = this.state.currentUser;
@@ -66,10 +61,9 @@ class App extends Component {
         .socket
         .send(JSON.stringify(message));
     }
-    const messages = this
-      .state
-      .messages
-      .concat(message);
+    this
+      .socket
+      .send(JSON.stringify(message));
   }
 
   render() {

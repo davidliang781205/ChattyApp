@@ -8,7 +8,7 @@ class Message extends Component {
     const imgSize = {
       width: '60%'
     }
-    if (new RegExp('(http:\/\/|https:\/\/)+.+(.jpg|.png|.jpeg|.svg|.gif)', 'g').test(this.props.content)) {
+    if (/(http:\/\/|https:\/\/)+.+\.(jpg|png|jpeg|svg|gif)/g.test(this.props.content)) {
       return (
         <div className="message">
           <span className="message-username" style={textColor}>{this.props.username}</span>

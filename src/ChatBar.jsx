@@ -9,8 +9,7 @@ class ChatBar extends Component {
             username: this.props.currentUser
                 ? this.props.currentUser
                 : "Anonymous",
-            content: '',
-            color: this.props.color
+            content: ''
         };
         this.inputEnter = this
             .inputEnter

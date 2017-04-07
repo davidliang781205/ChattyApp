@@ -46,29 +46,29 @@ wss.on('connection', (ws) => {
   wss.broadcast(JSON.stringify({ type: 'onlineUsers', number: wss.clients.size }));
   ws.send(JSON.stringify({ type: 'userColor', color: sockets[socketId].color }));
 
-  ws.on('message', (message) => {
-    message = JSON.parse(message);
+  ws.on('message', (messageRecived) => {
+    const message = JSON.parse(messageRecived);
+    const messageOutgoing = {};
+    messageOutgoing.username = message.username;
+    messageOutgoing.content = message.content;
+    messageOutgoing.uuid = uuidV1();
+    messageOutgoing.color = sockets[socketId].color;
     switch (message.type) {
       case "postMessage":
         // handle incoming message
-        message.type = 'incomingMessage';
-        message.uuid = uuidV1();
-        message.color = sockets[socketId].color;
-        message = JSON.stringify(message);
+        messageOutgoing.type = 'incomingMessage';
         break;
       case "postNotification":
         // handle incoming notification
-        message.type = 'incomingNotification';
-        message.uuid = uuidV1();
-        message.color = sockets[socketId].color;
-        message = JSON.stringify(message);
+        messageOutgoing.type = 'incomingNotification';
         break;
       default:
         // show an error in the console if the message type is unknown
         throw new Error("Unknown event type " + message.type);
     }
+    messageOutgoingString = JSON.stringify(messageOutgoing);
 
-    wss.broadcast(message);
+    wss.broadcast(messageOutgoingString);
   });
 
   // Set up a callback for when a client closes the socket. This usually means
